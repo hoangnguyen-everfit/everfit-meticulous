@@ -1,16 +1,15 @@
 export {};
 
-// Note: The official Meticulous API does NOT provide replay.native.performance.
-// The API only includes: isRunningAsTest, recordCustomValues, getCustomValues,
-// pause, resume, recordCustomEvent, and onReplayCustomEvent.
+// Meticulous replay API structure per official docs
+// (https://app.meticulous.ai/docs/reference/performance-api)
+interface MeticulousReplay {
+  isBenchmarkableReplay?: boolean;
+  native?: { performance: Performance };
+}
+
 interface MeticulousApi {
   isRunningAsTest?: boolean;
-  recordCustomValues?: (values: Record<string, unknown>) => void;
-  getCustomValues?: () => Record<string, unknown>;
-  pause?: () => void;
-  resume?: () => void;
-  recordCustomEvent?: (event: string, data?: unknown) => void;
-  onReplayCustomEvent?: (event: string, callback: (data?: unknown) => void) => void;
+  replay?: MeticulousReplay;
 }
 
 declare global {
