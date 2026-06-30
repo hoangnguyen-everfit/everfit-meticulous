@@ -38,6 +38,8 @@ export default function DashboardPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName.trim() }),
+    }).catch((error) => {
+      console.error("Failed to persist item:", error);
     });
     setItems((prev) => [...prev, { id, name: newName.trim() }]);
     setNewName("");

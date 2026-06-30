@@ -45,6 +45,23 @@ describe("capturePerformance", () => {
     expect(window.__perfMetrics?.[0]).toEqual({ name: "domContentLoaded", value: 40 });
   });
 
+  it("falls back to window.performance when isBenchmarkableReplay is true but native is missing", () => {
+    const perfSpy = vi.spyOn(window.performance, "getEntriesByType").mockReturnValue([
+      { domContentLoadedEventEnd: 70, startTime: 10 } as unknown as PerformanceEntry,
+    ]);
+
+    window.Meticulous = {
+      replay: {
+        isBenchmarkableReplay: true,
+        // native intentionally absent
+      },
+    };
+
+    expect(() => capturePerformance()).not.toThrow();
+    expect(perfSpy).toHaveBeenCalledWith("navigation");
+    expect(window.__perfMetrics?.[0]).toEqual({ name: "domContentLoaded", value: 60 });
+  });
+
   it("falls back to window.performance when isBenchmarkableReplay is false", () => {
     const perfSpy = vi.spyOn(window.performance, "getEntriesByType").mockReturnValue([
       { domContentLoadedEventEnd: 80, startTime: 30 } as unknown as PerformanceEntry,

@@ -7,10 +7,13 @@
 export function capturePerformance(): void {
   if (typeof window === "undefined") return;
 
+  // native is optional in the API, so fall back to window.performance unless both
+  // isBenchmarkableReplay is true AND native is actually present (avoids a crash).
   const replay = window.Meticulous?.replay;
-  const perf = replay?.isBenchmarkableReplay
-    ? replay.native!.performance
-    : window.performance;
+  const perf =
+    replay?.isBenchmarkableReplay && replay.native
+      ? replay.native.performance
+      : window.performance;
 
   const nav = perf.getEntriesByType("navigation")[0] as
     | PerformanceNavigationTiming
