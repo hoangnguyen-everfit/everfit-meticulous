@@ -1,0 +1,36 @@
+name: Meticulous
+
+# Must run on push to main, on PRs, and via workflow_dispatch.
+# Without main there is no baseline to diff against.
+on:
+  push:
+    branches:
+      - main
+  pull_request: {}
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+  pull-requests: write
+  statuses: read
+
+jobs:
+  test:
+    name: Meticulous
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t meticulous-demo:${{ github.sha }} .
+
+      - name: Run Meticulous tests
+        uses: alwaysmeticulous/report-diffs-action/upload-container@v1
+        with:
+          api-token: ${{ secrets.METICULOUS_API_TOKEN }}
+          image-tag: meticulous-demo:${{ github.sha }}
+          # container-port: leave empty -> Meticulous injects the PORT env var, matching the Dockerfile.
+          container-health-check-endpoint: "/api/health"
