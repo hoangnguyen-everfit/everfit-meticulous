@@ -1,30 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/lib/auth";
+import { isReplay, nextDeterministicId } from "@/lib/meticulous";
 
 type Item = { id: number; name: string };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
   const [newName, setNewName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadItems = async () => {
-    setIsLoading(true);
-    const res = await fetch("/api/items");
-    const data = await res.json();
-    setItems(data.items);
-    setIsLoading(false);
-  };
-
   useEffect(() => {
+    if (!isAuthenticated()) {
+      router.replace("/login");
+      return;
+    }
+    const loadItems = async () => {
+      setIsLoading(true);
+      const res = await fetch("/api/items");
+      const data = await res.json();
+      setItems(data.items);
+      setIsLoading(false);
+    };
     loadItems();
-  }, []);
+  }, [router]);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim()) return;
-    setItems((prev) => [...prev, { id: Date.now(), name: newName.trim() }]);
+    // Deterministic id during replay avoids flaky visual diffs from Date.now(). (#9)
+    const id = isReplay() ? nextDeterministicId() : Date.now();
+    // Fire a write request; Meticulous mocks this on replay (no real side-effect). (#3)
+    void fetch("/api/items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newName.trim() }),
+    });
+    setItems((prev) => [...prev, { id, name: newName.trim() }]);
     setNewName("");
   };
 
