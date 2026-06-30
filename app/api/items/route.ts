@@ -10,3 +10,13 @@ export async function GET() {
     ],
   });
 }
+
+// Mock write endpoint. In production this would persist; on replay Meticulous
+// returns the recorded response, so there is no real side-effect. (#3)
+export async function POST(request: Request) {
+  const body = (await request.json()) as { name?: string };
+  return NextResponse.json(
+    { item: { id: 0, name: body.name ?? "" } },
+    { status: 201 }
+  );
+}
