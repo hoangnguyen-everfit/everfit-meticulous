@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MeticulousBootstrap from "@/components/MeticulousBootstrap";
 
 export const metadata: Metadata = {
   title: "Meticulous Demo",
@@ -46,6 +47,7 @@ export default function RootLayout({
           color: "#1a1a2e",
         }}
       >
+        <MeticulousBootstrap />
         <nav
           style={{
             display: "flex",
