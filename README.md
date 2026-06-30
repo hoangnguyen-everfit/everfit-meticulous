@@ -71,7 +71,44 @@ pipeline **Docker + GitHub Actions** để thử quy trình Meticulous đầu-cu
 ```bash
 pnpm install      # cài deps
 pnpm dev          # chạy local (Phase A)
+pnpm test         # chạy unit test (Vitest + RTL)
 pnpm build        # build production
 docker build -t meticulous-demo .                          # build image (cần Docker)
 docker run -p 3000:3000 -e PORT=3000 meticulous-demo       # chạy thử image
 ```
+
+---
+
+## Meticulous integration (developer-side)
+
+Toàn bộ logic Meticulous nằm trong `lib/meticulous/` (port sang repo khác = copy 1 thư mục):
+
+- `isReplay()` / `isMeticulousBuild()` — phát hiện ngữ cảnh replay / test-build.
+- `injectAuthForReplay()` — (#7) inject một token cố định khi replay để trang protected
+  render được dù auth của session gốc khác/expired. Gọi qua `components/MeticulousBootstrap.tsx`.
+- `capturePerformance()` — (#8) đọc metric perf **thật** qua
+  `window.Meticulous.replay.native.performance`, chỉ khi `window.Meticulous.replay.isBenchmarkableReplay === true`
+  (khi replay thường, `window.performance` bị stub deterministic). Kết quả đẩy vào
+  `window.__perfMetrics` (xem trong DevTools console).
+- `nextDeterministicId()` — (#9) Dashboard dùng để id của item thêm vào **ổn định** khi
+  replay thay vì `Date.now()` (tránh flaky visual diff).
+
+### Auth token-gate (#7)
+
+`lib/auth.ts` lưu token vào `localStorage['demo_auth_token']`. `/dashboard` là protected —
+chưa login sẽ redirect về `/login`. Đây là demo-grade; app thật nên gate ở server.
+
+### Network mocking (#3)
+
+`GET /api/items` và `POST /api/items` được Meticulous **mock tự động** khi replay —
+phát lại response đã ghi, nên không có side-effect thật và không flaky.
+
+### Testing pool — chọn session nào chạy (#10)
+
+Cấu hình trong Meticulous UI (project settings → session selection / testing pool).
+Meticulous tự chọn session phủ các loại user, biến thể dữ liệu, tổ hợp feature flag khác nhau;
+bạn tinh chỉnh pool tại đó. Docs: https://app.meticulous.ai/docs/how-to/testing-pool
+
+### Unit tests
+
+`pnpm test` (Vitest + React Testing Library). Bản thân Meticulous là tầng visual e2e.
