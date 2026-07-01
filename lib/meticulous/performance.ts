@@ -7,24 +7,33 @@
 export function capturePerformance(): void {
   if (typeof window === "undefined") return;
 
-  // native is optional in the API, so fall back to window.performance unless both
-  // isBenchmarkableReplay is true AND native is actually present (avoids a crash).
-  const replay = window.Meticulous?.replay;
-  const perf =
-    replay?.isBenchmarkableReplay && replay.native
-      ? replay.native.performance
-      : window.performance;
+  // Telemetry must NEVER crash the app. During a real Meticulous replay the native
+  // performance object may not implement every method (docs only guarantee now()),
+  // so we feature-detect getEntriesByType and wrap everything in try/catch.
+  try {
+    // native is optional in the API, so fall back to window.performance unless both
+    // isBenchmarkableReplay is true AND native is actually present.
+    const replay = window.Meticulous?.replay;
+    const perf =
+      replay?.isBenchmarkableReplay && replay.native
+        ? replay.native.performance
+        : window.performance;
 
-  const nav = perf.getEntriesByType("navigation")[0] as
-    | PerformanceNavigationTiming
-    | undefined;
+    if (!perf || typeof perf.getEntriesByType !== "function") return;
 
-  const metric = {
-    name: "domContentLoaded",
-    value: nav ? nav.domContentLoadedEventEnd - nav.startTime : 0,
-  };
+    const nav = perf.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
 
-  window.__perfMetrics = window.__perfMetrics ?? [];
-  window.__perfMetrics.push(metric);
-  console.log("[meticulous][perf]", metric);
+    const metric = {
+      name: "domContentLoaded",
+      value: nav ? nav.domContentLoadedEventEnd - nav.startTime : 0,
+    };
+
+    window.__perfMetrics = window.__perfMetrics ?? [];
+    window.__perfMetrics.push(metric);
+    console.log("[meticulous][perf]", metric);
+  } catch (error) {
+    console.error("[meticulous][perf] capture failed:", error);
+  }
 }

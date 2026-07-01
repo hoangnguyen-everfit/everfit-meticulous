@@ -54,7 +54,7 @@ export default function RootLayout({
             gap: 16,
             padding: "12px 24px",
             borderBottom: "1px solid #e5e7eb",
-            background: "#f8f8fb",
+            background: "#5158cf",
           }}
         >
           <Link href="/" data-testid="link-home-nav">
