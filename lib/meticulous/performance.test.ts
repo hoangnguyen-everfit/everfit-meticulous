@@ -45,6 +45,20 @@ describe("capturePerformance", () => {
     expect(window.__perfMetrics?.[0]).toEqual({ name: "domContentLoaded", value: 40 });
   });
 
+  it("does not throw and records nothing when native performance lacks getEntriesByType", () => {
+    // The real Meticulous native performance object may only implement now();
+    // capturePerformance must not crash the app in that case.
+    window.Meticulous = {
+      replay: {
+        isBenchmarkableReplay: true,
+        native: { performance: { now: () => 0 } as unknown as Performance },
+      },
+    };
+
+    expect(() => capturePerformance()).not.toThrow();
+    expect(window.__perfMetrics).toBeUndefined();
+  });
+
   it("falls back to window.performance when isBenchmarkableReplay is true but native is missing", () => {
     const perfSpy = vi.spyOn(window.performance, "getEntriesByType").mockReturnValue([
       { domContentLoadedEventEnd: 70, startTime: 10 } as unknown as PerformanceEntry,
