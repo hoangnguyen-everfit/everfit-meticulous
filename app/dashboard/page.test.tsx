@@ -16,6 +16,7 @@ beforeEach(() => {
 afterEach(async () => {
   cleanup();
   await new Promise((resolve) => setTimeout(resolve, 0));
+  delete (window as Window).Meticulous;
   vi.restoreAllMocks();
 });
 
@@ -27,6 +28,15 @@ describe("DashboardPage", () => {
 
   it("loads items when authenticated", async () => {
     localStorage.setItem("demo_auth_token", "token-for-a@b.com");
+    render(<DashboardPage />);
+    await waitFor(() =>
+      expect(global.fetch).toHaveBeenCalledWith("/api/items")
+    );
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("does not redirect during a Meticulous replay even without a stored token", async () => {
+    window.Meticulous = { isRunningAsTest: true };
     render(<DashboardPage />);
     await waitFor(() =>
       expect(global.fetch).toHaveBeenCalledWith("/api/items")
