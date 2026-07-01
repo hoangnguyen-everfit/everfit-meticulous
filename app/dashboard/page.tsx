@@ -51,7 +51,7 @@ export default function DashboardPage() {
 
   return (
     <section>
-      <h1>Dashboard</h1>
+      <h1 style={{ color: "#5158cf" }}>Dashboard — Updated</h1>
 
       <form onSubmit={handleAdd} data-testid="form-add-item" style={{ display: "flex", gap: 8 }}>
         <input
