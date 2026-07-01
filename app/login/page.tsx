@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/auth";
+import SharedBanner from "@/components/SharedBanner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function LoginPage() {
 
   return (
     <section>
+      <SharedBanner />
       <h1>Login</h1>
       <form
         onSubmit={handleSubmit}

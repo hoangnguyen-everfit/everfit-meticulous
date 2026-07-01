@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth";
-import { isReplay, nextDeterministicId } from "@/lib/meticulous";
+import { isReplay, nextDeterministicId, injectAuthForReplay } from "@/lib/meticulous";
+import SharedBanner from "@/components/SharedBanner";
 
 type Item = { id: number; name: string };
 
@@ -14,6 +15,10 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Replay-safe: during a Meticulous replay, authenticate before guarding so the
+    // dashboard renders (otherwise the guard redirects to /login and this screen is
+    // never covered). Runs synchronously so isAuthenticated() below sees the token.
+    injectAuthForReplay();
     if (!isAuthenticated()) {
       router.replace("/login");
       return;
@@ -51,6 +56,7 @@ export default function DashboardPage() {
 
   return (
     <section>
+      <SharedBanner />
       <h1 style={{ color: "#5158cf" }}>Dashboard — Updated</h1>
 
       <form onSubmit={handleAdd} data-testid="form-add-item" style={{ display: "flex", gap: 8 }}>
