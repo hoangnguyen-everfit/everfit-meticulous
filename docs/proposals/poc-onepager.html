@@ -1,0 +1,242 @@
+<title>Meticulous POC — everfit-react</title>
+<style>
+  :root {
+    --ground: #f6f7f9;
+    --panel: #ffffff;
+    --ink: #14161d;
+    --muted: #6c7080;
+    --line: #e4e6ec;
+    --accent: #5158cf;
+    --accent-soft: #eef0ff;
+    --pass: #15803d;
+    --pass-bg: #e8f5ec;
+    --warn: #b45309;
+    --warn-bg: #fbf1e3;
+    --crit: #b91c1c;
+    --sans: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  .poc {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--ground);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 20px 64px;
+  }
+  .poc .wrap { max-width: 880px; margin: 0 auto; }
+
+  /* Header band */
+  .poc-hd {
+    background: var(--ink);
+    color: #fff;
+    max-width: 880px;
+    margin: 0 auto;
+    border-radius: 0 0 14px 14px;
+    padding: 34px 40px 30px;
+  }
+  .poc-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: #a9adc4;
+    margin: 0 0 14px;
+  }
+  .poc-hd h1 {
+    font-size: clamp(26px, 4.4vw, 36px);
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    font-weight: 800;
+    text-wrap: balance;
+    margin: 0 0 8px;
+  }
+  .poc-hd p { color: #c8cbdb; font-size: 15px; margin: 0; max-width: 60ch; }
+  .verdict {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 22px;
+    background: rgba(21,128,61,.16);
+    color: #7ee2a0;
+    border: 1px solid rgba(126,226,160,.35);
+    font-family: var(--mono); font-size: 13px; letter-spacing: .04em;
+    padding: 7px 14px; border-radius: 999px;
+  }
+  .verdict .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+
+  /* Metric strip */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 26px 0 8px; }
+  .metric { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .metric .n { font-family: var(--mono); font-size: 26px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+  .metric .l { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .metric .n.good { color: var(--pass); }
+  .metric .n.acc { color: var(--accent); }
+
+  /* Sections */
+  .sec { margin-top: 34px; }
+  .sec > h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--muted); font-weight: 700; margin: 0 0 14px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--line);
+  }
+
+  /* Results table */
+  .tbl-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+  tr:last-child td { border-bottom: none; }
+  td.pr { font-family: var(--mono); color: var(--accent); white-space: nowrap; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .chip.pass { background: var(--pass-bg); color: var(--pass); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn); }
+  .chip .d { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* Lesson cards */
+  .lessons { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .lesson { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 10px; padding: 18px 20px; }
+  .lesson h3 { font-size: 15px; margin: 0 0 8px; letter-spacing: -.01em; }
+  .lesson p { font-size: 13.5px; color: #3a3d49; margin: 0 0 8px; }
+  .lesson p.fix { color: var(--pass); margin: 0; font-size: 13px; }
+  .lesson .tag { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+
+  .trap { background: var(--warn-bg); border: 1px solid #edd6b3; border-radius: 10px; padding: 14px 18px; margin-top: 16px; font-size: 13.5px; color: #7a4d10; }
+  .trap b { color: var(--warn); }
+
+  /* two-col info */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .card h3 { font-size: 14px; margin: 0 0 10px; }
+  .card ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: #3a3d49; }
+  .card li { margin-bottom: 6px; }
+  .card li b { color: var(--ink); }
+
+  /* rollout */
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; position: relative; }
+  .step .ph { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .06em; }
+  .step .t { font-size: 14px; font-weight: 700; margin: 4px 0 4px; }
+  .step .d { font-size: 12.5px; color: var(--muted); }
+
+  .foot { margin-top: 30px; font-size: 12.5px; color: var(--muted); font-family: var(--mono); }
+  .foot span { color: var(--accent); }
+
+  @media (max-width: 680px) {
+    .metrics, .lessons, .cols, .flow { grid-template-columns: 1fr 1fr; }
+    .poc-hd { padding: 28px 22px 24px; border-radius: 0; }
+    .poc { padding: 0 14px 48px; }
+  }
+  @media (max-width: 440px) { .metrics, .flow { grid-template-columns: 1fr; } }
+</style>
+
+<div class="poc">
+  <header class="poc-hd">
+    <p class="poc-eyebrow">Proof of Concept · Frontend Regression Testing</p>
+    <h1>Meticulous on our stack: the record → CI → PR-diff pipeline works</h1>
+    <p>A hands-on evaluation on a Next.js SSR app (same family as <b style="color:#fff">everfit-react</b>), run end-to-end through GitHub Actions and real pull requests.</p>
+    <span class="verdict"><span class="dot"></span>Validated — recommend a time-boxed pilot</span>
+  </header>
+
+  <div class="wrap">
+    <div class="metrics">
+      <div class="metric"><div class="n acc">3</div><div class="l">PRs run through the full pipeline</div></div>
+      <div class="metric"><div class="n good">0</div><div class="l">Flaky results across ~10 runs</div></div>
+      <div class="metric"><div class="n">~60s</div><div class="l">CI build + upload per PR</div></div>
+      <div class="metric"><div class="n good">2</div><div class="l">Real defects surfaced</div></div>
+    </div>
+
+    <section class="sec">
+      <h2>What we tested &amp; what happened</h2>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Scenario</th><th>PR</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Recorder captures real user sessions</td>
+              <td class="pr">—</td>
+              <td><span class="chip pass"><span class="d"></span>Works</span></td>
+            </tr>
+            <tr>
+              <td>CI builds &amp; ships the app to Meticulous</td>
+              <td class="pr">—</td>
+              <td><span class="chip pass"><span class="d"></span>Works</span></td>
+            </tr>
+            <tr>
+              <td>UI change on a PR → visual diff</td>
+              <td class="pr">#4</td>
+              <td><span class="chip pass"><span class="d"></span>21 / 38 screens differed</span></td>
+            </tr>
+            <tr>
+              <td>Behavioral change (add-item action)</td>
+              <td class="pr">#6</td>
+              <td><span class="chip warn"><span class="d"></span>No diff — exposed a real limit</span></td>
+            </tr>
+            <tr>
+              <td>Change one component used on two screens</td>
+              <td class="pr">#7</td>
+              <td><span class="chip pass"><span class="d"></span>Flagged on both /login &amp; /dashboard</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13.5px;color:#3a3d49;margin:14px 2px 0;">Headline: we changed <b>one shared component</b> and Meticulous listed <b>every screen that renders it</b> — no manual "find usages". This is the regression class that unit tests and manual review routinely miss.</p>
+    </section>
+
+    <section class="sec">
+      <h2>Two lessons that decide success on everfit-react</h2>
+      <div class="lessons">
+        <div class="lesson">
+          <span class="tag">Lesson 1 · Auth</span>
+          <h3>Protected routes need "replay-safe" handling</h3>
+          <p>Pages behind login redirect to <span style="font-family:var(--mono)">/login</span> during replay (no valid token) — so Meticulous captures the login page instead of the real one, and changes go undetected.</p>
+          <p class="fix">✓ Fixed by making the auth guard replay-aware.</p>
+        </div>
+        <div class="lesson">
+          <span class="tag">Lesson 2 · Defensive code</span>
+          <h3>Replay-time code must never throw</h3>
+          <p>An unguarded call on page load crashed the whole app to an error page on every route. Meticulous then compared error-page vs error-page and reported "no differences".</p>
+          <p class="fix">✓ Fixed with feature-detection + try/catch.</p>
+        </div>
+      </div>
+      <div class="trap">⚠️ Both produce the same trap: a misleading <b>"zero differences"</b> that looks like a passing check but means the page was never tested. Rollout must verify replay renders the <b>real UI</b> — not just trust a green check.</div>
+    </section>
+
+    <section class="sec">
+      <h2>Cost, performance &amp; limits</h2>
+      <div class="cols">
+        <div class="card">
+          <h3>Cost &amp; performance</h3>
+          <ul>
+            <li><b>License:</b> no public pricing; indicative <b>~$2,086/yr</b> tiered by headcount (ranger.net, a competitor) → confirm with vendor.</li>
+            <li><b>Integration:</b> ~1–2 engineer-days for the first workflow.</li>
+            <li><b>Maintenance:</b> low — tests auto-generate &amp; self-maintain.</li>
+            <li><b>Speed:</b> ~60s CI build; 38–58 screens back in minutes; 0 flakes.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Where it is blind</h3>
+          <ul>
+            <li>Only tests <b>real recorded flows</b> — new/unused flows aren't covered.</li>
+            <li><b>Difference-detection</b>, not assertions — a human approves each diff.</li>
+            <li>Backend is <b>mocked</b> → frontend behavior only.</li>
+            <li>Needs a <b>baseline on main</b> and sessions from real non-prod usage.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2>Proposed rollout</h2>
+      <div class="flow">
+        <div class="step"><div class="ph">Phase 0</div><div class="t">Approve</div><div class="d">Vendor quote + security sign-off</div></div>
+        <div class="step"><div class="ph">Phase 1</div><div class="t">Pilot · 2–4 wks</div><div class="d">One workflow, non-blocking check</div></div>
+        <div class="step"><div class="ph">Phase 2</div><div class="t">Expand</div><div class="d">More flows; enable blocking</div></div>
+        <div class="step"><div class="ph">Phase 3</div><div class="t">Team-wide</div><div class="d">Standard on all PRs</div></div>
+      </div>
+    </section>
+
+    <p class="foot">Evidence — PRs <span>#4</span> (diff + crash caught) · <span>#6</span> (limit demonstrated) · <span>#7</span> (shared component, two screens) &nbsp;|&nbsp; repo <span>hoangnguyen-everfit/everfit-meticulous</span></p>
+  </div>
+</div>
