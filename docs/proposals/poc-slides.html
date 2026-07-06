@@ -1,0 +1,344 @@
+<title>Meticulous — Intro Deck</title>
+<style>
+  :root {
+    --bg: #0e1017;
+    --bg2: #161a24;
+    --panel: #1b1f2b;
+    --ink: #f4f5fa;
+    --muted: #9aa0b4;
+    --line: rgba(255,255,255,.11);
+    --accent: #7c83ff;
+    --accent2: #b7bbff;
+    --add: #34d399;
+    --add-bg: rgba(52,211,153,.13);
+    --rm: #fb7185;
+    --rm-bg: rgba(251,113,133,.13);
+    --warn: #fbbf24;
+    --warn-bg: rgba(251,191,36,.13);
+    --display: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+
+  .deck {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(1100px 700px at 78% -10%, rgba(124,131,255,.16), transparent 60%),
+      radial-gradient(900px 600px at 10% 110%, rgba(52,211,153,.08), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--display);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--add)); width: 0; transition: width .4s cubic-bezier(.4,0,.2,1); z-index: 10; }
+  .counter { position: fixed; bottom: 20px; right: 26px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); letter-spacing: .04em; z-index: 10; }
+  .brand { position: fixed; bottom: 20px; left: 26px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); letter-spacing: .06em; z-index: 10; }
+  .brand b { color: var(--accent2); font-weight: 600; }
+  .hint { position: fixed; bottom: 19px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 11px; color: rgba(154,160,180,.6); z-index: 10; }
+
+  .nav { position: fixed; bottom: 44px; right: 26px; display: flex; gap: 8px; z-index: 11; }
+  .nav button { width: 38px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--ink); font-size: 15px; cursor: pointer; transition: background .15s, border-color .15s; }
+  .nav button:hover { background: rgba(124,131,255,.18); border-color: var(--accent); }
+  .nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column; justify-content: center;
+    padding: 7vh clamp(28px, 8vw, 128px);
+    opacity: 0;
+  }
+  .slide.active { display: flex; animation: rise .5s cubic-bezier(.2,.7,.2,1) forwards; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  .eyebrow { font-family: var(--mono); font-size: clamp(12px,1.3vw,14px); letter-spacing: .2em; text-transform: uppercase; color: var(--accent2); margin: 0 0 22px; }
+  h1 { font-size: clamp(34px, 6.4vw, 74px); line-height: 1.04; letter-spacing: -.03em; font-weight: 800; margin: 0; text-wrap: balance; }
+  h2 { font-size: clamp(26px, 4.4vw, 46px); line-height: 1.08; letter-spacing: -.02em; font-weight: 800; margin: 0 0 26px; text-wrap: balance; }
+  .lead { font-size: clamp(16px, 2vw, 22px); color: var(--muted); max-width: 42ch; line-height: 1.5; margin: 26px 0 0; }
+  .accent { color: var(--accent2); }
+  .add-t { color: var(--add); }
+
+  /* divider */
+  .slide.divider { justify-content: center; }
+  .divider .actnum { font-family: var(--mono); font-weight: 700; font-size: clamp(66px, 16vw, 200px); line-height: .82; letter-spacing: -.04em; color: transparent; -webkit-text-stroke: 2px var(--accent); opacity: .55; margin: 0 0 10px; }
+  .divider h1 { font-size: clamp(36px, 7vw, 78px); }
+  .divider .sub { font-size: clamp(16px,2vw,20px); color: var(--muted); margin-top: 20px; max-width: 44ch; line-height: 1.5; }
+
+  .title-meta { margin-top: 40px; font-family: var(--mono); font-size: 13px; color: var(--muted); letter-spacing: .04em; }
+  .title-meta b { color: var(--ink); font-weight: 600; }
+
+  /* steps (how it works) */
+  .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 8px; }
+  .stepc { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px 24px; }
+  .stepc .k { font-family: var(--mono); font-size: 13px; color: var(--accent2); letter-spacing: .06em; }
+  .stepc h3 { font-size: 21px; margin: 12px 0 8px; letter-spacing: -.01em; }
+  .stepc p { font-size: 14.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+
+  /* generic lists */
+  ul.list { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 15px; }
+  ul.list li { font-size: clamp(16px,1.9vw,21px); line-height: 1.4; padding-left: 32px; position: relative; color: var(--ink); }
+  ul.list li::before { content: ""; position: absolute; left: 0; top: .5em; width: 11px; height: 11px; border-radius: 3px; background: var(--accent); }
+  ul.list li.rm::before { background: var(--rm); }
+  ul.list li.add::before { background: var(--add); }
+  ul.list li span { color: var(--muted); font-size: .8em; display: block; margin-top: 4px; }
+
+  /* two-column compare / cards */
+  .diff { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 6px; }
+  .pane { border-radius: 16px; padding: 24px 26px; border: 1px solid var(--line); background: var(--panel); }
+  .pane.before { border-left: 4px solid var(--rm); }
+  .pane.after  { border-left: 4px solid var(--add); }
+  .pane .tag { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+  .pane.before .tag { color: var(--rm); } .pane.after .tag { color: var(--add); }
+  .pane h3 { font-size: 20px; margin: 12px 0 8px; letter-spacing: -.01em; }
+  .pane p { font-size: 14.5px; color: var(--muted); margin: 0; line-height: 1.5; }
+  .pane p b { color: var(--ink); }
+
+  .cards.two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 6px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px 26px; }
+  .card h3 { font-size: 20px; margin: 0 0 12px; letter-spacing: -.01em; }
+  .card ul { margin: 0; padding-left: 20px; }
+  .card li { font-size: 15.5px; color: var(--muted); line-height: 1.5; margin-bottom: 9px; }
+  .card li b { color: var(--ink); }
+
+  /* metrics */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 8px; }
+  .metric { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px 20px; }
+  .metric .n { font-family: var(--mono); font-size: clamp(30px,3.6vw,46px); font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .metric .n.acc { color: var(--accent2); } .metric .n.good { color: var(--add); }
+  .metric .l { font-size: 13.5px; color: var(--muted); margin-top: 12px; line-height: 1.35; }
+
+  /* rollout */
+  .flow { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-top: 8px; }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 20px; }
+  .step .ph { font-family: var(--mono); font-size: 12px; color: var(--accent2); letter-spacing: .06em; }
+  .step .t { font-size: 20px; font-weight: 800; margin: 8px 0 6px; letter-spacing: -.01em; }
+  .step .d { font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+
+  @media (max-width: 720px) {
+    .metrics, .flow, .steps { grid-template-columns: 1fr; }
+    .diff, .cards.two { grid-template-columns: 1fr; }
+    .slide { padding: 8vh 26px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide.active { animation: none; }
+    .progress { transition: none; }
+  }
+</style>
+
+<div class="deck" id="deck">
+  <div class="progress" id="progress"></div>
+
+  <!-- 1 TITLE -->
+  <section class="slide">
+    <p class="eyebrow">An introduction · for everyone</p>
+    <h1>Testing that <span class="accent">writes itself.</span></h1>
+    <p class="lead">A gentle intro to <b style="color:var(--ink)">Meticulous</b> — a tool that catches broken screens automatically, before your users do.</p>
+    <p class="title-meta">Prepared by <b>hoangnguyenphuc</b> · Frontend Team</p>
+  </section>
+
+  <!-- 2 DIVIDER 01 -->
+  <section class="slide divider">
+    <p class="actnum">01</p>
+    <h1>The idea</h1>
+    <p class="sub">First, what problem are we solving — and how does this tool think about it?</p>
+  </section>
+
+  <!-- 3 PROBLEM -->
+  <section class="slide">
+    <p class="eyebrow">The everyday problem</p>
+    <h2>You fix one thing…<br>and quietly break another.</h2>
+    <ul class="list">
+      <li class="rm">We change the UI all the time — new features, tweaks, refactors</li>
+      <li class="rm">A change in one place can break a screen somewhere else<span>especially shared pieces reused across pages</span></li>
+      <li class="rm">Today we often find out <b>late</b> — from QA, or worse, from users</li>
+    </ul>
+  </section>
+
+  <!-- 4 CONCEPT: regression -->
+  <section class="slide">
+    <p class="eyebrow">One word to know</p>
+    <h2>A "regression".</h2>
+    <p class="lead" style="max-width:50ch;font-size:clamp(18px,2.4vw,26px);color:var(--ink)">Something that <span class="accent">used to work</span>, and your latest change <span style="color:var(--rm)">accidentally broke</span>.</p>
+    <p class="lead" style="max-width:52ch">"Regression testing" just means: checking that your change didn't break anything that was working before. Meticulous automates exactly this — for the frontend.</p>
+  </section>
+
+  <!-- 5 OLD VS NEW -->
+  <section class="slide">
+    <p class="eyebrow">Two ways to do it</p>
+    <h2>Write tests by hand…<br>or let the tool learn from real use.</h2>
+    <div class="diff">
+      <div class="pane before"><div class="tag">The traditional way</div><h3>Hand-written test scripts</h3><p>Slow to write, brittle, and someone has to update them every time the UI changes. Coverage is always behind.</p></div>
+      <div class="pane after"><div class="tag">Meticulous</div><h3>Learns from real sessions</h3><p>No test code to write or maintain. It watches how people actually use the app and turns that into tests automatically.</p></div>
+    </div>
+  </section>
+
+  <!-- 6 HOW IT WORKS -->
+  <section class="slide">
+    <p class="eyebrow">How it works — in plain terms</p>
+    <h2>Like a <span class="accent">security camera</span> + <span class="accent">spot-the-difference.</span></h2>
+    <div class="steps">
+      <div class="stepc"><div class="k">Step 1 · Record</div><h3>Watch real users</h3><p>A small script quietly records real sessions in our test environments — clicks, typing, everything.</p></div>
+      <div class="stepc"><div class="k">Step 2 · Replay</div><h3>Re-run them on new code</h3><p>When you open a pull request, it re-plays those same sessions on the old and the new version.</p></div>
+      <div class="stepc"><div class="k">Step 3 · Compare</div><h3>Flag what changed</h3><p>It puts the before/after screenshots side by side and highlights any difference for a human to approve.</p></div>
+    </div>
+  </section>
+
+  <!-- 7 THE ONE IDEA -->
+  <section class="slide">
+    <p class="eyebrow">If you remember one thing</p>
+    <h1>It tests what <span class="accent">real users</span> do —<br>and shows you <span class="add-t">exactly what your change altered</span>, on every screen.</h1>
+    <p class="lead" style="max-width:50ch">You stay in control: each difference is something a person reviews and approves or rejects.</p>
+  </section>
+
+  <!-- 8 DIVIDER 02 -->
+  <section class="slide divider">
+    <p class="actnum">02</p>
+    <h1>In practice</h1>
+    <p class="sub">We didn't just read about it — we tried it ourselves and watched what it caught.</p>
+  </section>
+
+  <!-- 9 WE TRIED IT -->
+  <section class="slide">
+    <p class="eyebrow">Our hands-on trial</p>
+    <h2>We ran it on a real app,<br>through real pull requests.</h2>
+    <ul class="list">
+      <li class="add">Built a small app on our own tech, connected Meticulous</li>
+      <li class="add">Used it like a normal user to record a few sessions</li>
+      <li class="add">Opened pull requests with real changes — and watched what it flagged</li>
+    </ul>
+  </section>
+
+  <!-- 10 WOW: shared component -->
+  <section class="slide">
+    <p class="eyebrow">The moment it clicked</p>
+    <h2>Change one shared piece →<br>it finds <span class="add-t">every screen</span> it lives on.</h2>
+    <div class="diff">
+      <div class="pane before"><div class="tag">What the developer did</div><h3>"Just tweaking one banner"</h3><p>Edited a single shared component — without remembering everywhere it appears.</p></div>
+      <div class="pane after"><div class="tag">What Meticulous showed</div><h3>Flagged on 2 different screens</h3><p>It surfaced the change on <b>both</b> the login and dashboard pages — automatically, with no one telling it where to look.</p></div>
+    </div>
+  </section>
+
+  <!-- 11 caught a bug -->
+  <section class="slide">
+    <p class="eyebrow">It also caught a real bug</p>
+    <h2>A crash our other tests<br><span style="color:var(--rm)">completely missed.</span></h2>
+    <p class="lead" style="max-width:54ch">One change made the app fail to load for real users. Our normal tests stayed green — but replaying an actual user session caught it immediately. That's the kind of bug that otherwise reaches production.</p>
+  </section>
+
+  <!-- 12 DIVIDER 03 -->
+  <section class="slide divider">
+    <p class="actnum">03</p>
+    <h1>The numbers</h1>
+    <p class="sub">What it delivered, what it costs, where it fits — and what we're asking for.</p>
+  </section>
+
+  <!-- 13 RESULTS -->
+  <section class="slide">
+    <p class="eyebrow">Results from our trial</p>
+    <h2>What the tool delivered.</h2>
+    <div class="metrics">
+      <div class="metric"><div class="n acc">3</div><div class="l">Pull requests tested end-to-end</div></div>
+      <div class="metric"><div class="n good">0</div><div class="l">Flaky / false alarms</div></div>
+      <div class="metric"><div class="n">~1 min</div><div class="l">To run per pull request</div></div>
+      <div class="metric"><div class="n good">2</div><div class="l">Real problems caught</div></div>
+    </div>
+  </section>
+
+  <!-- 14 COST & SPEED -->
+  <section class="slide">
+    <p class="eyebrow">Cost &amp; effort</p>
+    <h2>Fast to run, light to maintain.</h2>
+    <div class="cards two">
+      <div class="card"><h3>What it costs</h3><ul>
+        <li><b>~$2,086 / year</b> (indicative — from a competitor's page; we'll confirm an official quote)</li>
+        <li><b>~1–2 days</b> to set up the first workflow</li>
+        <li>Very little upkeep — tests maintain themselves</li>
+      </ul></div>
+      <div class="card"><h3>How it feels</h3><ul>
+        <li>Feedback on a pull request in <b>minutes</b></li>
+        <li><b>No test code</b> to write or babysit</li>
+        <li>Reliable — <b>no flaky failures</b> in our trial</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 15 GOOD AT / NOT -->
+  <section class="slide">
+    <p class="eyebrow">Being honest</p>
+    <h2>Where it shines — and where it doesn't.</h2>
+    <div class="cards two">
+      <div class="card"><h3 style="color:var(--add)">Great at</h3><ul>
+        <li>Catching <b>visual &amp; behavioral regressions</b> on real user flows</li>
+        <li>Finding <b>every screen</b> a change affects</li>
+        <li>Zero test-writing, zero maintenance</li>
+      </ul></div>
+      <div class="card"><h3 style="color:var(--rm)">Not for</h3><ul>
+        <li>Brand-new features <b>no one has used yet</b></li>
+        <li>Deep <b>backend</b> checks (it focuses on the frontend)</li>
+        <li>Replacing our other tests — it <b>complements</b> them</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 16 ROLLOUT -->
+  <section class="slide">
+    <p class="eyebrow">How we'd adopt it</p>
+    <h2>Start small, low risk.</h2>
+    <div class="flow">
+      <div class="step"><div class="ph">Step 1</div><div class="t">Approve</div><div class="d">Get a quote + security sign-off</div></div>
+      <div class="step"><div class="ph">Step 2</div><div class="t">Pilot</div><div class="d">One workflow, 2–4 weeks, non-blocking</div></div>
+      <div class="step"><div class="ph">Step 3</div><div class="t">Expand</div><div class="d">More flows once we trust it</div></div>
+      <div class="step"><div class="ph">Step 4</div><div class="t">Team-wide</div><div class="d">Standard on every pull request</div></div>
+    </div>
+  </section>
+
+  <!-- 17 THE ASK -->
+  <section class="slide">
+    <p class="eyebrow">The ask</p>
+    <h1>Let's try a <span class="accent">short pilot</span><br>on everfit-react.</h1>
+    <p class="lead" style="max-width:52ch">It works on our stack, catches things we miss today, and starts with zero risk. All we need to begin: a quote and a quick security sign-off.</p>
+    <p class="title-meta">Thank you · Questions?</p>
+  </section>
+
+  <div class="nav">
+    <button id="prev" aria-label="Previous slide">‹</button>
+    <button id="next" aria-label="Next slide">›</button>
+  </div>
+  <span class="brand"><b>Meticulous</b> · an introduction</span>
+  <span class="hint">← → to navigate</span>
+  <span class="counter" id="counter">01</span>
+</div>
+
+<script>
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.deck .slide'));
+    var i = 0;
+    var progress = document.getElementById('progress');
+    var counter = document.getElementById('counter');
+    function pad(n){ return (n < 10 ? '0' : '') + n; }
+    function show(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach(function (s, k) { s.classList.toggle('active', k === i); });
+      progress.style.width = ((i + 1) / slides.length * 100) + '%';
+      counter.textContent = pad(i + 1) + ' / ' + pad(slides.length);
+    }
+    function next(){ show(i + 1); }
+    function prev(){ show(i - 1); }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { next(); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { prev(); e.preventDefault(); }
+      else if (e.key === 'Home') { show(0); }
+      else if (e.key === 'End') { show(slides.length - 1); }
+    });
+    document.getElementById('next').addEventListener('click', next);
+    document.getElementById('prev').addEventListener('click', prev);
+    document.getElementById('deck').addEventListener('click', function (e) {
+      if (e.target.closest('button') || e.target.closest('a')) return;
+      var x = e.clientX / window.innerWidth;
+      if (x > 0.62) next(); else if (x < 0.2) prev();
+    });
+    show(0);
+  })();
+</script>
